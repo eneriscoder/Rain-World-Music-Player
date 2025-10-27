@@ -138,7 +138,6 @@ namespace RWMusicPlayerMain {
             {
                 // This code will run when the button is clicked
                 UnityEngine.Debug.Log("Music Player Clicked.");
-                //MusicPlayerProcess musicProcess = new MusicPlayerProcess(self.manager);
                 self.manager.RequestMainProcessSwitch(MusicPlayerProcessID);
                 self.PlaySound(SoundID.MENU_Button_Standard_Button_Pressed);
             }, self.mainMenuButtons.Count - 2);
@@ -349,7 +348,6 @@ namespace RWMusicPlayerMain {
                     clipclip = loadedAssetBundle2.m_AssetBundle.LoadAsset<AudioClip>(providedsong);
                 }
             }
-            UnityEngine.Debug.Log("loaded 1");
             bool flag3 = clipclip == null;
             Song result;
             if (flag3)
@@ -359,7 +357,6 @@ namespace RWMusicPlayerMain {
             }
             else
             {
-                UnityEngine.Debug.Log("loaded 2");
                 bool willfadein = false;
                 bool flag4 = DJstartedat != null;
                 if (flag4)
@@ -372,10 +369,7 @@ namespace RWMusicPlayerMain {
                         songtoavoid = providedsong;
                         return null;
                     }
-                    UnityEngine.Debug.Log($"loaded 2.05 {songlength}");
-                    UnityEngine.Debug.Log($"loaded 2.1{ DJstartedat.Value}, {elapsedTime()}, {songlength}");
                     float songprogress = (elapsedTime() - DJstartedat.Value) / songlength;
-                    UnityEngine.Debug.Log("loaded 2.2");
                     bool flag6 = songprogress < 0.95f;
                     if (!flag6)
                     {
@@ -395,7 +389,6 @@ namespace RWMusicPlayerMain {
                     }
                     willfadein = (songprogress > 0.05f);
                 }
-                UnityEngine.Debug.Log("loaded 3");
                 bool flag8 = providedsong == latest_song_requested;
                 if (flag8)
                 {
@@ -411,7 +404,6 @@ namespace RWMusicPlayerMain {
                 }
                 else
                 {
-                    UnityEngine.Debug.Log("loaded 4");
                     Song song = new Song(musicPlayer, providedsong, MusicPlayer.MusicContext.Arena) // plays custom music only in arena because of context
                     {
                         priority = 25520764f,
@@ -427,7 +419,6 @@ namespace RWMusicPlayerMain {
                     MusicPiece.SubTrack sub = song.subTracks[0];
                     sub.source.Pause();
                     sub.source.clip = clipclip;
-                    UnityEngine.Debug.Log($"loaded 5 {sub.source.clip}, {sub.source}, {sub}, {song}");
                     sub.isStreamed = true;
                     bool flag11 = !UpdateIntensity;
                     float volumeeeee;
@@ -451,11 +442,9 @@ namespace RWMusicPlayerMain {
                     }
                     sub.readyToPlay = true;
                     sub.isSynced = false;
-                    UnityEngine.Debug.Log($"loaded 6 {sub.source.clip}, {sub.source}, {sub}");
                     song.subTracks[0] = sub;
                     latest_song_requested = song.name;
                     result = song;
-                    UnityEngine.Debug.Log($"loaded 7 {song.name}");
                 }
             }
             return result;
@@ -472,7 +461,6 @@ namespace RWMusicPlayerMain {
             }
             else
             {
-                UnityEngine.Debug.Log($"loaded 9 {song.name}");
                 bool flag2 = song.name != latest_song_requested;
                 if (flag2)
                 {
@@ -480,7 +468,6 @@ namespace RWMusicPlayerMain {
                 }
                 else
                 {
-                    UnityEngine.Debug.Log($"loaded 10 {song.name}");
                     //MeadowMusicData musicdata = ((MeadowGameMode)OnlineManager.lobby.gameMode).avatars[0].GetData<MeadowMusicData>();
                     bool flag3 = timetobestarted != null;
                     if (flag3)
@@ -594,7 +581,7 @@ namespace RWMusicPlayerMain {
                 pages[0].Container.AddChild(background);
 
                 // Create title
-                titleLabel = new FLabel(Custom.GetFont(), "MUSIC PLAYER");
+                titleLabel = new FLabel(Custom.GetDisplayFont(), "MUSIC PLAYER");
                 titleLabel.SetPosition(683f, 600f);
                 titleLabel.color = UnityEngine.Color.white;
                 titleLabel.scale = 1.5f;
@@ -602,12 +589,42 @@ namespace RWMusicPlayerMain {
 
                 // Back button
                 var backbtn_size = new Vector2(150f, 40f);
-                var backbtn_pos = new Vector2(screenWidth / 2 - backbtn_size[0] / 2, screenHeight / 2 + screenHeight / 10 + backbtn_size[1] / 2);
+
+                var verticalequallity = new Vector2(backbtn_size[0] / 2, backbtn_size[1] / 2); // global (x, y) equallity increments 
+
+                var backbtn_pos = new Vector2(2 * screenWidth / 3 - backbtn_size[0] / 2, screenHeight / 2 + screenHeight / 10 + verticalequallity[1]);
                 backButton = new SimpleButton(this, pages[0], "BACK TO MENU", "back",
                     backbtn_pos, backbtn_size);
                 pages[0].subObjects.Add(backButton);
 
-                // Add some music control buttons
+                // List label
+                var songsLabel_pos = new Vector2(screenWidth / 3 - verticalequallity[0], screenHeight / 2 + screenHeight / 10 + verticalequallity[1]);
+                FLabel songsLabel = new FLabel(Custom.GetDisplayFont(), "SONGS");
+                songsLabel.SetPosition(songsLabel_pos);
+                songsLabel.color = UnityEngine.Color.white;
+                songsLabel.scale = 1.25f;
+                pages[0].Container.AddChild(songsLabel);
+
+                //Song labels
+                string songsPath = "C:/Program Files (x86)/Steam/steamapps/common/Rain World/RainWorld_Data/StreamingAssets/mods/rwmusicplayer/music/songs";
+                DirectoryInfo directoryInfo = new DirectoryInfo(songsPath);
+                FileInfo[] songFiles = directoryInfo.GetFiles();
+
+                int songIndex = 0;
+
+                foreach (FileInfo songFile in songFiles)
+                {
+                    var label_pos = new Vector2(songsLabel.GetPosition()[0], songsLabel.GetPosition()[1] - verticalequallity[1] * (1 + songIndex) - screenHeight / 50);
+                    FLabel songLabel = new FLabel(Custom.GetFont(), songFile.Name);
+                    songLabel.SetPosition(label_pos);
+                    songLabel.color = UnityEngine.Color.white;
+                    songsLabel.scale = 1.1f;
+                    pages[0].Container.AddChild(songLabel);
+
+                    songIndex++;
+                }
+
+                /*
                 var playbtn_size = new Vector2(80f, 30f);
                 var playbtn_pos = new Vector2(screenWidth / 2 - screenWidth / 10 - playbtn_size[0] / 2, screenHeight / 2 - screenHeight / 10 + playbtn_size[1] / 2);
                 var playButton = new SimpleButton(this, pages[0], "PLAY", "play",
@@ -619,6 +636,7 @@ namespace RWMusicPlayerMain {
                 var stopButton = new SimpleButton(this, pages[0], "STOP", "stop",
                     stopbtn_pos, stopbtn_size);
                 pages[0].subObjects.Add(stopButton);
+                */
 
                 UnityEngine.Debug.Log("UI elements created successfully");
             }
